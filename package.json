@@ -1,0 +1,33 @@
+{
+  "name": "science-paper-bot",
+  "version": "1.0.0",
+  "description": "discord bot to get and post science paper",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc && concurrently \"tsc -w\" \"nodemon $1\"",
+    "start": "tsc && node $1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aotti/science-paper-bot.git"
+  },
+  "keywords": [],
+  "author": "aotti",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aotti/science-paper-bot/issues"
+  },
+  "homepage": "https://github.com/aotti/science-paper-bot#readme",
+  "dependencies": {
+    "discord.js": "^14.24.2",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.2",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
