@@ -1,6 +1,7 @@
 import { Client, IntentsBitField } from "discord.js";
 import { config } from "dotenv";
 import { resolve } from "path";
+import { Paper } from "./classes/Paper.js";
 
 // set env
 const ENV_PATH = resolve(process.cwd(), '.env')
@@ -22,6 +23,8 @@ bot.on('clientReady', b => {
     // set activity
     b.user.setActivity('/paper')
     // run daily function
+    const paper = new Paper
+    paper.scrap(b)
 })
 
 bot.login(process.env['BOT_TOKEN'])
