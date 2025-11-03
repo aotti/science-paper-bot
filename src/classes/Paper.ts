@@ -1,4 +1,4 @@
-import { Client, EmbedBuilder, ThreadChannel } from "discord.js";
+import { Client, EmbedBuilder, MessageFlags, ThreadChannel } from "discord.js";
 
 interface IPaperData {
     Title: string,
@@ -30,22 +30,10 @@ export class Paper {
                 const paperHead = i === 0 ? `${paperTitle}\n- ${paperSource}` : `- ${paperSource}`
                 // send paper head
                 paperThread.send(paperHead)
-
-                // loop paper data
-                for(let paper of paperData) {
-                    // ### UNTUK SOURCE = nature 
-                    // ### HANYA PERLU DATA = doi, link
-                    // ### YANG LAIN PERLU = title, doi, link, image
-                    // set article data
-                    const articleTitle = `> - ${paper.Title}`
-                    const articleDOI = `> - DOI: ${paper.DOI}`
-                    const articleLink = `${paper.Link}`
-                    const articleImage = paper.Image
-                    // merge article data as string
-                    const paperBody = `${articleTitle}\n${articleLink}\n${articleDOI}\n${articleImage}`
-                    // send paper body
-                    paperThread.send(`@silent ${paperBody}`)
-                }
+                // send paper body
+                this.setPaperBody(paperSources[i], paperData).forEach(v => {
+                    paperThread.send({content: v, flags: MessageFlags.SuppressNotifications})
+                })
             }
             // paper counter
             i++
@@ -64,5 +52,26 @@ export class Paper {
             default:
                 return [null as T, paperResponse.Message]
         }
+    }
+
+    private setPaperBody(source: string, paperData: IPaperData[]) {
+        const paperBody = []
+        // loop paper data
+        for(let paper of paperData) {
+            // ### UNTUK SOURCE = nature 
+            // ### HANYA PERLU DATA = doi, link
+            // ### YANG LAIN PERLU = title, doi, link, image
+            // set article data
+            const articleTitle = `> - ${paper.Title}`
+            const articleDOI = `> - DOI: ${paper.DOI}`
+            const articleLink = `${paper.Link}`
+            const articleImage = paper.Image
+            // merge article data as string
+            if(source.match(/nature/i))
+                paperBody.push(`${articleDOI}\n${articleLink}`)
+            else
+                paperBody.push(`${articleTitle}\n${articleLink}\n${articleDOI}\n${articleImage}`)
+        }
+        return paperBody
     }
 }
