@@ -7,12 +7,23 @@ interface IPaperData {
     Image: string,
 }
 
+interface IPaperSource {
+    name: string,
+    endpoint: string,
+    param: string,
+}
+
 export class Paper {
     async scrap(client: Client<true>) {
         // set thread channel
         const paperThread = await client.channels.fetch(process.env['PAPER_THREAD']) as ThreadChannel
         // get paper data based on source
-        const paperSources = ['nature']
+        const paperSources: IPaperSource[] = [
+            {name: 'Nature', endpoint: 'nature', param: ''},
+            {name: 'ACS Pubs - Applied Materials & Interfaces', endpoint: 'acs', param: '1'},
+            {name: 'ACS Pubs - Inorganic Chemistry', endpoint: 'acs', param: '2'},
+            {name: 'ACS Pubs - Organometallics', endpoint: 'acs', param: '3'},
+        ]
         let i = 0
         setInterval(async () => {
             const [paperData, paperError] = await this.getPaper<IPaperData[]>(paperSources[i])
@@ -25,13 +36,13 @@ export class Paper {
                 // set paper stuff
                 const paperDate = new Date().toLocaleString([], {weekday: 'long', day: 'numeric', month: 'short', year: 'numeric'})
                 const paperTitle = `Today's Paper - ${paperDate}`
-                const paperSource = `**SOURCE: ${paperSources[i]}**`
+                const paperSource = `**SOURCE: ${paperSources[i].name}**`
                 // set paper content
                 const paperHead = i === 0 ? `${paperTitle}\n- ${paperSource}` : `- ${paperSource}`
                 // send paper head
                 paperThread.send(paperHead)
                 // send paper body
-                this.setPaperBody(paperSources[i], paperData).forEach(v => {
+                this.setPaperBody(paperSources[i].name, paperData).forEach(v => {
                     paperThread.send({content: v, flags: MessageFlags.SuppressNotifications})
                 })
             }
@@ -39,12 +50,12 @@ export class Paper {
             i++
             // reset counter if all sources has been fetched
             if(i === paperSources.length) i = 0
-        }, 30_000);
+        }, 60_000);
     }
 
-    private async getPaper<T>(source: string): Promise<[T, any]> {
+    private async getPaper<T>(source: IPaperSource): Promise<[T, any]> {
         // fetch paper data
-        const paperEndpoint = `http://localhost:8080/api/${source}`
+        const paperEndpoint = `http://localhost:8080/api/${source.endpoint}/${source.param}` 
         const paperResponse = await (await fetch(paperEndpoint)).json()
         switch(paperResponse.Status) {
             case 200:
