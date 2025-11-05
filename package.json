@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/aotti/science-paper-bot#readme",
   "dependencies": {
+    "cron": "^4.3.3",
     "discord.js": "^14.24.2",
     "dotenv": "^17.2.3"
   },

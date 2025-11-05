@@ -21,8 +21,8 @@ export class Paper {
         const paperSources: IPaperSource[] = [
             {name: 'Nature', endpoint: 'nature', param: ''},
             {name: 'ACS Pubs - Applied Materials & Interfaces', endpoint: 'acs', param: '1'},
-            {name: 'ACS Pubs - Inorganic Chemistry', endpoint: 'acs', param: '2'},
-            {name: 'ACS Pubs - Organometallics', endpoint: 'acs', param: '3'},
+            // {name: 'ACS Pubs - Inorganic Chemistry', endpoint: 'acs', param: '2'},
+            // {name: 'ACS Pubs - Organometallics', endpoint: 'acs', param: '3'},
         ]
         let i = 0
         setInterval(async () => {
@@ -43,7 +43,12 @@ export class Paper {
                 paperThread.send(paperHead)
                 // send paper body
                 this.setPaperBody(paperSources[i].name, paperData).forEach(v => {
-                    paperThread.send({content: v, flags: MessageFlags.SuppressNotifications})
+                    // paperThread.send({content: v, flags: MessageFlags.SuppressNotifications})
+                    const paperEmbed = new EmbedBuilder()
+                    paperEmbed.setTitle(v.Title)
+                    paperEmbed.setDescription(`${v.Link}\nDOI: ${v.DOI}`)
+                    paperEmbed.setImage(v.Image)
+                    paperThread.send({embeds: [paperEmbed],  flags: MessageFlags.SuppressNotifications})
                 })
             }
             // paper counter
@@ -66,22 +71,19 @@ export class Paper {
     }
 
     private setPaperBody(source: string, paperData: IPaperData[]) {
-        const paperBody = []
+        const paperBody = [] as IPaperData[]
         // loop paper data
         for(let paper of paperData) {
             // ### UNTUK SOURCE = nature 
             // ### HANYA PERLU DATA = doi, link
             // ### YANG LAIN PERLU = title, doi, link, image
             // set article data
-            const articleTitle = `> - ${paper.Title}`
-            const articleDOI = `> - DOI: ${paper.DOI}`
+            const articleTitle = paper.Title
+            const articleDOI = paper.DOI
             const articleLink = `${paper.Link}`
             const articleImage = paper.Image
             // merge article data as string
-            if(source.match(/nature/i))
-                paperBody.push(`${articleDOI}\n${articleLink}`)
-            else
-                paperBody.push(`${articleTitle}\n${articleLink}\n${articleDOI}\n${articleImage}`)
+                paperBody.push({Title: articleTitle, DOI: articleDOI, Link: articleLink, Image: articleImage})
         }
         return paperBody
     }
