@@ -2,6 +2,7 @@ import { Client, IntentsBitField } from "discord.js";
 import { config } from "dotenv";
 import { resolve } from "path";
 import { Paper } from "./classes/Paper.js";
+import { CronJob, CronJobParams } from "cron";
 
 // set env
 const ENV_PATH = resolve(process.cwd(), '.env')
@@ -24,7 +25,18 @@ bot.on('clientReady', b => {
     b.user.setActivity('/paper')
     // run daily function
     const paper = new Paper
-    paper.scrap(b)
+    const jobErrorHandler = (error: any) => {
+        console.log('crob job failed:', error)
+    }
+    // seconds, minutes, hours, days, months, years
+    //    0        0       0      *     *       *
+    const job = new CronJob('0 0 9 * * *', () => {
+        paper.scrap(b)
+    // onComplete, onStart, timeZone
+    }, null, true, 'UTC+7',
+    // context, runOnInit, utcOffset, unrefTimeout, waitForCompletion, errorHandler
+    null, null, null, null, null, jobErrorHandler)
+    
 })
 
 bot.login(process.env['BOT_TOKEN'])

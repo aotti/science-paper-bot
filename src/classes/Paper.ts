@@ -21,15 +21,18 @@ export class Paper {
         const paperSources: IPaperSource[] = [
             {name: 'Nature', endpoint: 'nature', param: ''},
             {name: 'ACS Pubs - Applied Materials & Interfaces', endpoint: 'acs', param: '1'},
-            // {name: 'ACS Pubs - Inorganic Chemistry', endpoint: 'acs', param: '2'},
-            // {name: 'ACS Pubs - Organometallics', endpoint: 'acs', param: '3'},
+            {name: 'ACS Pubs - Inorganic Chemistry', endpoint: 'acs', param: '2'},
+            {name: 'ACS Pubs - Organometallics', endpoint: 'acs', param: '3'},
         ]
         let i = 0
-        setInterval(async () => {
+        const paperInterval = setInterval(async () => {
             const [paperData, paperError] = await this.getPaper<IPaperData[]>(paperSources[i])
-            // failed to get paper
+            // stop interval after all paper sent
+            if(i === paperSources.length) return clearInterval(paperInterval)
+            // failed to get paper, stop interval
             if(paperError) {
-
+                paperThread.send(paperError)
+                return clearInterval(paperInterval)
             }
             // success getting paper
             else {
@@ -53,9 +56,7 @@ export class Paper {
             }
             // paper counter
             i++
-            // reset counter if all sources has been fetched
-            if(i === paperSources.length) i = 0
-        }, 60_000);
+        }, 120_000);
     }
 
     private async getPaper<T>(source: IPaperSource): Promise<[T, any]> {
@@ -74,9 +75,6 @@ export class Paper {
         const paperBody = [] as IPaperData[]
         // loop paper data
         for(let paper of paperData) {
-            // ### UNTUK SOURCE = nature 
-            // ### HANYA PERLU DATA = doi, link
-            // ### YANG LAIN PERLU = title, doi, link, image
             // set article data
             const articleTitle = paper.Title
             const articleDOI = paper.DOI
