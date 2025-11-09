@@ -25,6 +25,7 @@ bot.on('clientReady', b => {
     b.user.setActivity('/paper')
     // run daily function
     const paper = new Paper
+    
     const jobErrorHandler = (error: any) => {
         console.log('crob job failed:', error)
     }
