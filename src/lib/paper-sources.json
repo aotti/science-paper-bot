@@ -1,5 +1,15 @@
 {
     "list": [
-        {"name": "Nature", "endpoint": "nature", "param": ""}
+        {"name": "Nature", "endpoint": "nature", "param": ""},
+
+        {"name": "ACS Pubs - Applied Materials & Interfaces", "endpoint": "acs", "param": "1"},
+        {"name": "ACS Pubs - Inorganic Chemistry", "endpoint": "acs", "param": "2"},
+        {"name": "ACS Pubs - Organometallics", "endpoint": "acs", "param": "3"},
+
+        {"name": "Wiley - Angewandte Chemie International Edition ", "endpoint": "wiley", "param": "1"},
+        {"name": "Wiley - Advanced Materials", "endpoint": "wiley", "param": "2"},
+        {"name": "Wiley - Advanced Functional Materials", "endpoint": "wiley", "param": "3"},
+        {"name": "Wiley - Advanced Optical Materials", "endpoint": "wiley", "param": "4"},
+        {"name": "Wiley - Advanced Science", "endpoint": "wiley", "param": "5"}
     ]
 }
