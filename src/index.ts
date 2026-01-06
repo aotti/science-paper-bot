@@ -29,8 +29,9 @@ bot.on('clientReady', b => {
     const jobErrorHandler = (error: any) => {
         console.log('crob job failed:', error)
     }
+    // loop everyday at 9 AM UTC+7
     // seconds, minutes, hours, days, months, years
-    //    0        0       0      *     *       *
+    //    0        0       9      *     *       *
     const job = new CronJob('0 0 9 * * *', () => {
         paper.scrap(b)
     // onComplete, onStart, timeZone

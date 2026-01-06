@@ -1,4 +1,4 @@
-import { Client, EmbedBuilder, MessageFlags, ThreadChannel } from "discord.js";
+import { AttachmentBuilder, BufferResolvable, Client, EmbedBuilder, MessageFlags, ThreadChannel } from "discord.js";
 import paper_sources from "../lib/paper-sources.json" with {type: 'json'}
 import RedisClient from "../lib/redis.js";
 
@@ -49,7 +49,7 @@ export class Paper {
                 // send paper head
                 paperThread.send(paperHead)
                 // send paper body
-                const paperList = this.setPaperBody(paperSources[i].name, paperData)
+                const paperList = this.setPaperBody(paperData)
                 for(let paper of paperList) {
                     // check if paper still fresh
                     if(getPostedPapers && getPostedPapers?.length > 0) {
@@ -61,11 +61,10 @@ export class Paper {
                         }
                     }
                     // set paper embed
-                    const paperEmbed = new EmbedBuilder()
-                    paperEmbed.setTitle(paper.Title)
-                    paperEmbed.setDescription(`${paper.Link}\nDOI: ${paper.DOI}`)
-                    paperEmbed.setImage(paper.Image)
-                    paperThread.send({embeds: [paperEmbed],  flags: MessageFlags.SuppressNotifications})
+                    const [paperEmbed, imageFile] = this.setPaperEmbed(paperSources[i].name, paper)
+                    paperSources[i].name.match(/nature/i) 
+                        ? paperThread.send({embeds: [paperEmbed], flags: MessageFlags.SuppressNotifications})
+                        : paperThread.send({embeds: [paperEmbed], files: [{attachment: imageFile}], flags: MessageFlags.SuppressNotifications})
                     // save posted paper to redis
                     await this.updatePostedPaper(paper.Link)
                 }
@@ -87,7 +86,7 @@ export class Paper {
         }
     }
 
-    private setPaperBody(source: string, paperData: IPaperData[]) {
+    private setPaperBody(paperData: IPaperData[]) {
         const paperBody = [] as IPaperData[]
         // loop paper data
         for(let paper of paperData) {
@@ -97,9 +96,23 @@ export class Paper {
             const articleLink = `${paper.Link}`
             const articleImage = paper.Image
             // merge article data as string
-                paperBody.push({Title: articleTitle, DOI: articleDOI, Link: articleLink, Image: articleImage})
+            paperBody.push({Title: articleTitle, DOI: articleDOI, Link: articleLink, Image: articleImage})
         }
         return paperBody
+    }
+
+    private setPaperEmbed(source: string, paper: IPaperData): [EmbedBuilder, BufferResolvable] {
+        const paperEmbed = new EmbedBuilder()
+        paperEmbed.setTitle(paper.Title)
+        paperEmbed.setDescription(`${paper.Link}\nDOI: ${paper.DOI}`)
+        if(source.match(/nature/i)) {
+            paperEmbed.setImage(paper.Image)
+            return [paperEmbed, null as any]
+        } else {
+            const imageBuffer = Buffer.from(paper.Image.split(',')[1], 'base64')
+            const imageFile = new AttachmentBuilder(imageBuffer).attachment as BufferResolvable
+            return [paperEmbed, imageFile]
+        }
     }
     
     private async updatePostedPaper(url: string) {
